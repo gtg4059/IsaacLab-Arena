@@ -89,7 +89,7 @@ def add_isaaclab_arena_cli_args(parser: argparse.ArgumentParser) -> None:
     arena_group.add_argument(
         "--enable_physics_settle_check",
         action="store_true",
-        default=True,
+        default=False,
         help=(
             "Enable physics settle check after reset. When False, the settle check is skipped and the placement pool is"
             " not re-selected."

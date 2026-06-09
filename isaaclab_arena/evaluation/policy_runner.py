@@ -64,7 +64,7 @@ def rollout_policy(
     num_steps: int | None,
     num_episodes: int | None,
     language_instruction: str | None = None,
-    enable_physics_settle_check: bool = True,
+    enable_physics_settle_check: bool = False,
 ) -> dict[str, Any]:
     assert num_steps is not None or num_episodes is not None, "Either num_steps or num_episodes must be provided"
     assert num_steps is None or num_episodes is None, "Only one of num_steps or num_episodes must be provided"
