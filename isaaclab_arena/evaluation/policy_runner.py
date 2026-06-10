@@ -17,7 +17,6 @@ from isaaclab_arena.evaluation.policy_runner_cli import add_policy_runner_argume
 from isaaclab_arena.metrics.metrics_logger import metrics_to_plain_python_types
 from isaaclab_arena.utils.isaaclab_utils.simulation_app import SimulationAppContext
 from isaaclab_arena.utils.multiprocess import get_local_rank, get_world_size
-from isaaclab_arena.utils.random import set_seed
 from isaaclab_arena_environments.cli import get_arena_builder_from_cli, get_isaaclab_arena_environments_cli_parser
 
 if TYPE_CHECKING:
@@ -170,18 +169,14 @@ def main():
         if is_distributed(args_cli):
             args_cli.distributed = True
             args_cli.device = f"cuda:{local_rank}"
+            # Per-rank seed when distributed so each process has a different seed
+            if args_cli.seed is not None:
+                args_cli.seed += local_rank
 
         # Build scene. Use rgb_array render mode when recording so RecordVideo can grab frames.
         arena_builder = get_arena_builder_from_cli(args_cli)
         render_mode = "rgb_array" if args_cli.video else None
         env, cfg = arena_builder.make_registered_and_return_cfg(render_mode=render_mode)
-
-        # Per-rank seed when distributed so each process has a different seed
-        seed = args_cli.seed
-        if seed is not None and is_distributed(args_cli):
-            seed = seed + local_rank
-        if seed is not None:
-            set_seed(seed, env)
 
         # Create the policy from the arguments
         policy = policy_cls.from_args(args_cli)
