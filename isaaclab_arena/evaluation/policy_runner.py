@@ -17,7 +17,6 @@ from isaaclab_arena.cli.isaaclab_arena_cli import get_isaaclab_arena_cli_parser
 from isaaclab_arena.evaluation.camera_video import CameraObsVideoRecorder
 from isaaclab_arena.evaluation.policy_runner_cli import add_policy_runner_arguments
 from isaaclab_arena.metrics.metrics_logger import metrics_to_plain_python_types
-from isaaclab_arena.relations.placement_events import run_placement_physics_settle_check
 from isaaclab_arena.utils.isaaclab_utils.simulation_app import SimulationAppContext
 from isaaclab_arena.utils.multiprocess import get_local_rank, get_world_size
 from isaaclab_arena.utils.random import set_seed
@@ -25,7 +24,6 @@ from isaaclab_arena_environments.cli import get_arena_builder_from_cli, get_isaa
 
 if TYPE_CHECKING:
     from isaaclab_arena.policy.policy_base import PolicyBase
-    from isaaclab_arena.relations.physics_settle_params import PhysicsSettleParams
 
 
 def get_policy_cls(policy_type: str) -> type[PolicyBase]:
@@ -76,13 +74,6 @@ def rollout_policy(
     pbar = None
     try:
         obs, _ = env.reset()
-        # Re-select any placement that doesn't physically settle after the reset, then adopt the
-        # refreshed observation it returns.
-        # No-ops internally when the env has no pooled placement at the builder level, returning None.
-        if enable_physics_settle_check:
-            refreshed_obs = run_placement_physics_settle_check(env, physics_settle_params)
-            if refreshed_obs is not None:
-                obs = refreshed_obs
         policy.reset()
         # Determine language instruction: CLI/job-level override takes precedence over the task's own
         # description. Use unwrapped to reach the base env through any gym wrappers (e.g. OrderEnforcing).
